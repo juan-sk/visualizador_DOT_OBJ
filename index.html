@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ver obj</title>
+</head>
+
+<body>
+
+    <!-- <canvas id="estacionEspacial" width="1080" height="1920" style="border:1px solid #000000;"></canvas> -->
+    <canvas id="pantalla" width="800" height="600" style="border:1px solid #000000;"></canvas><br>
+    <input type="file" id="modelo" multiple="multiple" accept=".obj">
+    <h2>
+        controles
+    </h2>
+    <div>
+        <input type="range" id="escala" name="escala" min="1" max="300" step="1" onchange="cambiarEscala(value)">
+        <label for="escala">escala</label>
+    </div>
+    <div>
+        <input type="range" id="offsetX" name="offsetX" min="-100" max="300" onchange="cambiarOffsetX(value)">
+        <label for="offsetX">offsetX</label>
+    </div>
+    <div>
+        <input type="range" id="offsetY" name="offsetY" min="-100" max="300" onchange="cambiarOffsetY(value)">
+        <label for="offsetY">offsetY</label>
+    </div>
+    <hr>
+    <h4>Vistas</h4>
+    <input type="radio" name="action" id="vista1" value="1" onchange="cambiarVista(value)" /><label
+        for="">vista1</label><br>
+    <input type="radio" name="action" id="vista2" value="2" onchange="cambiarVista(value)" /><label
+        for="">vista2</label><br>
+    <input type="radio" name="action" id="vista3" value="3" onchange="cambiarVista(value)" /><label
+        for="">vista3</label><br>
+    <input type="radio" name="action" id="vista4" value="4" onchange="cambiarVista(value)" /><label
+        for="">vista4</label><br>
+    <input type="radio" name="action" id="vista5" value="5" onchange="cambiarVista(value)" /><label
+        for="">vista5</label><br>
+    <input type="radio" name="action" id="vista6" value="6" onchange="cambiarVista(value)" /><label
+        for="">vista6</label><br>
+
+
+
+    <script src="objParser.js"></script>
+    <script src="Renderizador.js"></script>
+    <script src="Vista.js"></script>
+    <script>
+
+        loaded = false;
+        modelo = {};
+        escala = 1;
+        pantalla = "pantalla";
+        canvas = document.getElementById(pantalla);
+        offsetX = 0;
+        offsetY = 0;
+        motor = {}
+        window.onload = function () {
+            var canvas = document.getElementById(pantalla);
+            var ctx = canvas.getContext("2d");
+            document.getElementById("modelo").addEventListener("change", upload, false);
+        }
+        function upload(e) {
+            var file = e.target.files[0];
+            var reader = new FileReader();
+            reader.readAsText(file);
+            reader.onload = function (event) {
+                console.log("cargando archivo");
+                var obj = event.target.result;
+
+                let vectores = ObjParser.parse(obj);
+                parametros = {
+                    escala: escala,
+                    offsetX: offsetX,
+                    offsetY: offsetY,
+                    modelo: vectores,
+                    vista: new Vista(0, 1),
+                    canvas: canvas
+
+                }
+                motor = new Renderizador(parametros);
+                motor.renderizar();
+                console.log("cantidad de vertices", vectores.length);
+                console.log("archivo Cargado");
+
+            }
+            loaded = true;
+        }
+
+
+        function cambiarEscala(e) {
+            motor.escala = e;
+            motor.renderizar();
+        }
+        function cambiarOffsetX(e) {
+            motor.offsetX = Number(e);
+            motor.renderizar();
+
+        }
+        function cambiarOffsetY(e) {
+            motor.offsetY = Number(e);
+            motor.renderizar();
+        }
+
+        function cambiarVista($event) {
+            switch (+$event) {
+                case 1:
+                    motor.vista = new Vista(0, 1);
+                    break;
+                case 2:
+                    motor.vista = new Vista(0, 2);
+
+                    break;
+                case 3:
+                    motor.vista = new Vista(1, 0);
+
+                    break;
+                case 4:
+                    motor.vista = new Vista(1, 2);
+
+                    break;
+                case 5:
+                    motor.vista = new Vista(2, 0);
+
+                    break;
+                case 6:
+                    motor.vista = new Vista(2, 1);
+
+                    break;
+                default:
+                    break;
+            }
+            motor.renderizar();
+        }
+    </script>
+</body>
+
+</html>
